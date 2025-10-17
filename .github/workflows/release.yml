@@ -23,6 +23,8 @@ jobs:
       # See https://github.com/helm/chart-releaser-action/issues/6
       - name: Install Helm
         uses: azure/setup-helm@v1
+        with:
+            charts_dir: bitnami
 
       # - name: Add dependency chart repos
       #   run: |
