@@ -20,10 +20,11 @@ jobs:
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
       # See https://github.com/helm/chart-releaser-action/issues/6
-      - name: Install Helm
-        uses: azure/setup-helm@v1
-        with:
-          version: v3
+      #  this should not be necessary by now
+      # - name: Install Helm
+      #   uses: azure/setup-helm@v1
+      #   with:
+      #     version: v3
 
       # - name: Add dependency chart repos
       #   run: |
@@ -31,7 +32,7 @@ jobs:
       #     helm repo add grafana https://grafana.github.io/helm-charts
 
       - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.0.0
+        uses: helm/chart-releaser-action@v1.7.0
         with:
             charts_dir: bitnami
         env:
