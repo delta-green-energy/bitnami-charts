@@ -587,7 +587,7 @@
 
 ## <small>10.9.8 (2022-12-22)</small>
 
-* [bitnami/consul] Adding templating to ingress hostname to allow things like e.g. "some-nice-url-{{ . ([8dc6a5c](https://github.com/bitnami/charts/commit/8dc6a5c71a1fc2ffaf86dc0d950bab9605cde3ee)), closes [#14057](https://github.com/bitnami/charts/issues/14057)
+* [bitnami/consul] Adding templating to ingress hostname to allow things like e.g. "some-nice-url-\{\{ redacted \}\}" . ([8dc6a5c](https://github.com/bitnami/charts/commit/8dc6a5c71a1fc2ffaf86dc0d950bab9605cde3ee)), closes [#14057](https://github.com/bitnami/charts/issues/14057)
 
 ## <small>10.9.7 (2022-12-14)</small>
 
