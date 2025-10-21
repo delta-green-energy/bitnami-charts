@@ -8,6 +8,7 @@ jobs:
   merge:
     permissions:
       contents: write
+      actions: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
