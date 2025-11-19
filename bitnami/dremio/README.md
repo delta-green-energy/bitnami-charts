@@ -1,6 +1,6 @@
 <!--- app-name: Dremio -->
 
-# Bitnami package for Dremio
+# Bitnami Secure Images Helm chart for Dremio
 
 Dremio is an open-source self-service data access tool that provides high-performance queries for interactive analytics on data lakes.
 
@@ -16,16 +16,22 @@ helm install my-release oci://registry-1.docker.io/bitnamicharts/dremio
 
 Looking to use dremio in production? Try [VMware Tanzu Application Catalog](https://bitnami.com/enterprise), the enterprise edition of Bitnami Application Catalog.
 
-## ⚠️ Important Notice: Upcoming changes to the Bitnami Catalog
+## Why use Bitnami Secure Images?
 
-Beginning August 28th, 2025, Bitnami will evolve its public catalog to offer a curated set of hardened, security-focused images under the new [Bitnami Secure Images initiative](https://news.broadcom.com/app-dev/broadcom-introduces-bitnami-secure-images-for-production-ready-containerized-applications). As part of this transition:
+Those are hardened, minimal CVE images built and maintained by Bitnami. Bitnami Secure Images are based on the cloud-optimized, security-hardened enterprise [OS Photon Linux](https://vmware.github.io/photon/). Why choose BSI images?
 
-- Granting community users access for the first time to security-optimized versions of popular container images.
-- Bitnami will begin deprecating support for non-hardened, Debian-based software images in its free tier and will gradually remove non-latest tags from the public catalog. As a result, community users will have access to a reduced number of hardened images. These images are published only under the “latest” tag and are intended for development purposes
-- Starting August 28th, over two weeks, all existing container images, including older or versioned tags (e.g., 2.50.0, 10.6), will be migrated from the public catalog (docker.io/bitnami) to the “Bitnami Legacy” repository (docker.io/bitnamilegacy), where they will no longer receive updates.
-- For production workloads and long-term support, users are encouraged to adopt Bitnami Secure Images, which include hardened containers, smaller attack surfaces, CVE transparency (via VEX/KEV), SBOMs, and enterprise support.
+- Hardened secure images of popular open source software with Near-Zero Vulnerabilities
+- Vulnerability Triage & Prioritization with VEX Statements, KEV and EPSS Scores
+- Compliance focus with FIPS, STIG, and air-gap options, including secure bill of materials (SBOM)
+- Software supply chain provenance attestation through in-toto
+- First class support for the internet’s favorite Helm charts
 
-These changes aim to improve the security posture of all Bitnami users by promoting best practices for software supply chain integrity and up-to-date deployments. For more details, visit the [Bitnami Secure Images announcement](https://github.com/bitnami/containers/issues/83267).
+Each image comes with valuable security metadata. You can view the metadata in [our public catalog here](https://app-catalog.vmware.com/bitnami/apps). Note: Some data is only available with [commercial subscriptions to BSI](https://bitnami.com/).
+
+![Alt text](https://github.com/bitnami/containers/blob/main/BSI%20UI%201.png?raw=true "Application details")
+![Alt text](https://github.com/bitnami/containers/blob/main/BSI%20UI%202.png?raw=true "Packaging report")
+
+If you are looking for our previous generation of images based on Debian Linux, please see the [Bitnami Legacy registry](https://hub.docker.com/u/bitnamilegacy).
 
 ## Introduction
 
@@ -226,7 +232,7 @@ For configuring AWS as distributed storage, use the `externalS3` section (replac
 
 ```yaml
 dremio:
-  distStorageType: minio
+  distStorageType: aws
 
 minio:
   enabled: false
@@ -235,7 +241,19 @@ externalS3:
   accessKeyID: DREMIO_ACCESS_KEY_ID
   accessKeySecret: DREMIO_ACCESS_KEY_SECRET
   bucket: DREMIO_BUCKET
-  regien: DREMIO_REGION
+  region: DREMIO_REGION
+```
+
+If a role needs to be assumed to access s3, append this configuration to your deployment
+
+```yaml
+dremio:
+  coreSite:
+    appendConfiguration: |
+      <property>
+        <name>fs.s3a.assumed.role.arn</name>
+        <value>ROLE_TO_ASSUME</value>
+      </property>
 ```
 
 #### Azure Storage as distributed storage
@@ -401,7 +419,7 @@ It is also possible to rely on the chart certificate auto-generation capabilitie
 
 ### Ingress
 
-This chart provides support for Ingress resources. If you have an ingress controller installed on your cluster, such as [nginx-ingress-controller](https://github.com/bitnami/charts/tree/main/bitnami/nginx-ingress-controller) or [contour](https://github.com/bitnami/charts/tree/main/bitnami/contour) you can utilize it to serve your application.To enable Ingress integration, set `ingress.enabled` to `true`.
+This chart provides support for Ingress resources. If you have an ingress controller installed on your cluster, such as [nginx-ingress-controller](https://github.com/bitnami/charts/tree/main/bitnami/nginx-ingress-controller) or [contour](https://github.com/bitnami/charts/tree/main/bitnami/contour) you can utilize it to serve your application. To enable Ingress integration, set `ingress.enabled` to `true`.
 
 The most common scenario is to have one host name mapped to the deployment. In this case, the `ingress.hostname` property can be used to set the host name. The `ingress.tls` parameter can be used to add the TLS configuration for this host.
 
@@ -409,7 +427,7 @@ However, it is also possible to have more than one host. To facilitate this, the
 
 > NOTE: For each host specified in the `ingress.extraHosts` parameter, it is necessary to set a name, path, and any annotations that the Ingress controller should know about. Not all annotations are supported by all Ingress controllers, but [this annotation reference document](https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/nginx-configuration/annotations.md) lists the annotations supported by many popular Ingress controllers.
 
-Adding the TLS parameter (where available) will cause the chart to generate HTTPS URLs, and the  application will be available on port 443. The actual TLS secrets do not have to be generated by this chart. However, if TLS is enabled, the Ingress record will not work until the TLS secret exists.
+Adding the TLS parameter (where available) will cause the chart to generate HTTPS URLs, and the application will be available on port 443. The actual TLS secrets do not have to be generated by this chart. However, if TLS is enabled, the Ingress record will not work until the TLS secret exists.
 
 [Learn more about Ingress controllers](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/).
 
@@ -1174,6 +1192,18 @@ There are cases where you may want to deploy extra objects, such a ConfigMap con
 | `defaultInitContainers.volumePermissions.containerSecurityContext.enabled`                | Enabled init container' Security Context                                                                                                                                                                                                            | `true`                     |
 | `defaultInitContainers.volumePermissions.containerSecurityContext.seLinuxOptions`         | Set SELinux options in init container                                                                                                                                                                                                               | `{}`                       |
 | `defaultInitContainers.volumePermissions.containerSecurityContext.runAsUser`              | Set init container's Security Context runAsUser                                                                                                                                                                                                     | `0`                        |
+| `defaultInitContainers.importMinIOCert.resourcesPreset`                                   | Set init container resources according to one common preset (allowed values: none, nano, small, medium, large, xlarge, 2xlarge). This is ignored if volumePermissions.resources is set (volumePermissions.resources is recommended for production). | `nano`                     |
+| `defaultInitContainers.importMinIOCert.resources`                                         | Set init container requests and limits for different resources like CPU or memory (essential for production workloads)                                                                                                                              | `{}`                       |
+| `defaultInitContainers.importMinIOCert.containerSecurityContext.enabled`                  | Enabled Init container' Security Context                                                                                                                                                                                                            | `true`                     |
+| `defaultInitContainers.importMinIOCert.containerSecurityContext.seLinuxOptions`           | Set SELinux options in Init container                                                                                                                                                                                                               | `{}`                       |
+| `defaultInitContainers.importMinIOCert.containerSecurityContext.runAsUser`                | Set runAsUser in Init container' Security Context                                                                                                                                                                                                   | `1001`                     |
+| `defaultInitContainers.importMinIOCert.containerSecurityContext.runAsGroup`               | Set runAsGroup in Init container' Security Context                                                                                                                                                                                                  | `1001`                     |
+| `defaultInitContainers.importMinIOCert.containerSecurityContext.runAsNonRoot`             | Set runAsNonRoot in Init container' Security Context                                                                                                                                                                                                | `true`                     |
+| `defaultInitContainers.importMinIOCert.containerSecurityContext.readOnlyRootFilesystem`   | Set readOnlyRootFilesystem in Init container' Security Context                                                                                                                                                                                      | `true`                     |
+| `defaultInitContainers.importMinIOCert.containerSecurityContext.privileged`               | Set privileged in Init container' Security Context                                                                                                                                                                                                  | `false`                    |
+| `defaultInitContainers.importMinIOCert.containerSecurityContext.allowPrivilegeEscalation` | Set allowPrivilegeEscalation in Init container' Security Context                                                                                                                                                                                    | `false`                    |
+| `defaultInitContainers.importMinIOCert.containerSecurityContext.capabilities.drop`        | List of capabilities to be dropped in Init container                                                                                                                                                                                                | `["ALL"]`                  |
+| `defaultInitContainers.importMinIOCert.containerSecurityContext.seccompProfile.type`      | Set seccomp profile in Init container                                                                                                                                                                                                               | `RuntimeDefault`           |
 
 ### MinIO&reg; chart parameters
 
